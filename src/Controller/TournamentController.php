@@ -44,12 +44,18 @@ class TournamentController extends AbstractController
             $this->serviceFactory->getTournamentRoundService()
         );
 
-        return new CreatedResponse($this->serializerService->responseWithGroup($tournament, ['tournament_games']));
+        return new CreatedResponse($this->serializerService->responseWithGroup($tournament, ['show_tournaments']));
     }
 
-    #[Route('/show/{id}', name: 'app_tournament_show')]
+    #[Route('/{id}', name: 'app_tournament_show')]
     public function show(Tournament $tournament): Response
     {
-        return new SuccessResponse($this->serializerService->responseWithGroup($tournament, ['tournament_games']));
+        return new SuccessResponse($this->serializerService->responseWithGroup($tournament, ['show_tournaments']));
+    }
+
+    #[Route('/{id}/games', name: 'app_tournament_show')]
+    public function showTournamentGames(Tournament $tournament): Response
+    {
+        return new SuccessResponse($this->serializerService->responseWithGroup($tournament->getGames(), ['show_tournaments']));
     }
 }

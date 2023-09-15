@@ -16,6 +16,9 @@ class SerializeService
     {
         $context = (new ObjectNormalizerContextBuilder())
             ->withGroups($group)
+            ->withCircularReferenceHandler(function ($object) use ($group) {
+                return $object->getId();
+            })
             ->toArray();
 
         return $this->serializer->serialize($data, 'json', $context);
