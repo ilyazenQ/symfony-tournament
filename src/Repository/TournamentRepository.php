@@ -57,4 +57,13 @@ class TournamentRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+    public function findWithGame(int $id): Tournament
+    {
+           return $this->createQueryBuilder('t')
+               ->leftJoin('t.games', 'g') // 'games' - это название связи между Tournament и Game
+               ->where('t.id = :tournamentId')
+               ->setParameter('tournamentId', $id)
+               ->getQuery()
+               ->getOneOrNullResult();
+    }
 }
