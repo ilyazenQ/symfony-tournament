@@ -8,12 +8,13 @@ use App\Repository\TournamentRepository;
 use App\Request\Tournament\TournamentCreateRequest;
 use App\Response\CreatedResponse;
 use App\Response\SuccessResponse;
+use App\Service\Request\RequestService;
 use App\Service\Serializer\SerializeService;
 use App\Service\Tournament\TournamentServiceFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api/tournaments')]
@@ -22,6 +23,7 @@ class TournamentController extends AbstractController
     public function __construct(
         private readonly TournamentRepository $tournamentRepository,
         private readonly EntityManagerInterface $em,
+        private readonly RequestService $requestService,
         private readonly SerializeService $serializerService,
         private readonly TournamentServiceFactory $serviceFactory
     ) {
@@ -36,9 +38,11 @@ class TournamentController extends AbstractController
     }
 
     #[Route('/create', name: 'app_tournament_create', methods: ['POST'])]
-    public function create(#[MapRequestPayload] TournamentCreateRequest $request): Response
+    public function create(Request $request, CreateTournamentAction $action): Response
     {
-        $tournament = (new CreateTournamentAction())->execute(
+        $request = $this->requestService->processRequest($request, TournamentCreateRequest::class);
+
+        $tournament = $action->execute(
             $request,
             $this->em,
             $this->serviceFactory->getTournamentRoundService()
@@ -56,6 +60,8 @@ class TournamentController extends AbstractController
     #[Route('/{id}/games', name: 'app_tournament_show')]
     public function showTournamentGames(Tournament $tournament): Response
     {
-        return new SuccessResponse($this->serializerService->responseWithGroup($tournament->getGames(), ['show_tournaments']));
+        return new SuccessResponse(
+            $this->serializerService->responseWithGroup($tournament->getGames(), ['show_tournaments'])
+        );
     }
 }

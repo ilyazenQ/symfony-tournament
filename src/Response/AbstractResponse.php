@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Response\Error;
+namespace App\Response;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-class ValidationErrorResponse extends JsonResponse
+abstract class AbstractResponse extends JsonResponse
 {
-    public function __construct($data = null, $status = 422, $headers = [], $options = 0)
+    public function __construct($data, $status = 200, $headers = [], $options = 0)
     {
         $formattedData = [
-            'status' => 'Validation Errors',
+            'code' => $status,
             'data' => $data
         ];
 
