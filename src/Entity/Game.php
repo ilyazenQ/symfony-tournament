@@ -16,7 +16,7 @@ class Game
     #[Groups(['tournament_games'])]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'games')]
+    #[ORM\ManyToOne(fetch: 'EAGER', inversedBy: 'games')]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['tournament_games'])]
     private ?Tournament $tournament = null;

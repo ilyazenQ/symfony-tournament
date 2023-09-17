@@ -8,19 +8,20 @@ use App\Request\Team\TeamCreateRequest;
 use App\Response\CreatedResponse;
 use App\Response\SuccessResponse;
 use App\Service\Request\RequestService;
-use App\Service\Serializer\SerializeService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/teams')]
 class TeamController extends AbstractController
 {
     public function __construct(
         private readonly TeamRepository $teamRepository,
-        private readonly SerializeService $serializerService,
         private readonly RequestService $requestService,
+        private readonly SerializerInterface $serializer,
+
     ) {
     }
 
@@ -29,7 +30,7 @@ class TeamController extends AbstractController
     {
         $teams = $this->teamRepository->findAll();
 
-        return new SuccessResponse($this->serializerService->responseWithGroup($teams, ['show_team']));
+        return new SuccessResponse($this->serializer->serialize($teams , 'json'));
     }
 
     #[Route('/create', name: 'app_team_create', methods: ['POST'])]
@@ -39,6 +40,6 @@ class TeamController extends AbstractController
 
         $team = $action->execute($request, $this->teamRepository);
 
-        return new CreatedResponse($this->serializerService->responseWithGroup($team, ['show_team']));
+        return new CreatedResponse($this->serializer->serialize($team , 'json'), 201);
     }
 }

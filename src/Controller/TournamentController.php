@@ -13,9 +13,11 @@ use App\Service\Serializer\SerializeService;
 use App\Service\Tournament\TournamentServiceFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route('/api/tournaments')]
 class TournamentController extends AbstractController
@@ -24,7 +26,7 @@ class TournamentController extends AbstractController
         private readonly TournamentRepository $tournamentRepository,
         private readonly EntityManagerInterface $em,
         private readonly RequestService $requestService,
-        private readonly SerializeService $serializerService,
+        private readonly SerializerInterface $serializer,
         private readonly TournamentServiceFactory $serviceFactory
     ) {
     }
@@ -34,7 +36,7 @@ class TournamentController extends AbstractController
     {
         $tournaments = $this->tournamentRepository->findAll();
 
-        return new SuccessResponse($this->serializerService->responseWithGroup($tournaments, ['show_tournaments']));
+        return new SuccessResponse($this->serializer->serialize($tournaments , 'json'));
     }
 
     #[Route('/create', name: 'app_tournament_create', methods: ['POST'])]
@@ -48,20 +50,18 @@ class TournamentController extends AbstractController
             $this->serviceFactory->getTournamentRoundService()
         );
 
-        return new CreatedResponse($this->serializerService->responseWithGroup($tournament, ['show_tournaments']));
+        return new CreatedResponse($this->serializer->serialize($tournament , 'json'), 201);
     }
 
-    #[Route('/{id}', name: 'app_tournament_show')]
+    #[Route('/{id}', name: 'app_tournament_show', methods: 'GET')]
     public function show(Tournament $tournament): Response
     {
-        return new SuccessResponse($this->serializerService->responseWithGroup($tournament, ['show_tournaments']));
+        return new SuccessResponse($this->serializer->serialize($tournament , 'json'));
     }
 
-    #[Route('/{id}/games', name: 'app_tournament_show')]
+    #[Route('/{id}/games', name: 'app_tournament_show_games', methods: 'GET')]
     public function showTournamentGames(Tournament $tournament): Response
     {
-        return new SuccessResponse(
-            $this->serializerService->responseWithGroup($tournament->getGames(), ['show_tournaments'])
-        );
+        return new SuccessResponse($this->serializer->serialize($tournament , 'json', ['with' => ['Games']]));
     }
 }
