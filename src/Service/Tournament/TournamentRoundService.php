@@ -21,12 +21,9 @@ class TournamentRoundService
 
     private function resolveTeams(array $teams, EntityManagerInterface $em): array
     {
-        if (count($teams) === 0) {
-            $teams = $em->getRepository(Team::class)->findAll();
-        } else {
-            $teams = $em->getRepository(Team::class)->findBy(['id' => $teams]);
-        }
-        return $teams;
+        return count($teams) === 0 ? $em->getRepository(Team::class)->findAll() : $em->getRepository(
+            Team::class
+        )->findBy(['id' => $teams]);
     }
 
     public function process(RequestInterface $request, EntityManagerInterface $em): Tournament
